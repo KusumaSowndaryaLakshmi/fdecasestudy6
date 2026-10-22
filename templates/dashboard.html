@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report delivery reliability</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Report delivery reliability</h1>
+    <p class="sub">Meridian Payments &middot; scheduled statements &middot; checked as of {{ as_of.strftime('%d %b %Y, %H:%M') }}</p>
+  </div>
+  <form method="post" action="{{ url_for('reset') }}"><button class="ghost">Reload demo data</button></form>
+</header>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, m in msgs %}<div class="flash {{ cat }}" role="status">{{ m }}</div>{% endfor %}
+{% endwith %}
+
+<section class="answer">
+  <p class="lead">
+    {% if summary.failed or summary.suspect or summary.unknown %}
+      {{ summary.failed + summary.suspect + summary.unknown }} of {{ runs|length }} report runs never reached a customer.
+      <strong>{{ summary.to_retry }}</strong> can be retried automatically,
+      <strong>{{ summary.to_escalate }}</strong> needs a person.
+    {% else %}
+      All {{ runs|length }} report runs were delivered.
+    {% endif %}
+    {% if summary.recovered %}{{ summary.recovered }} more only succeeded after a retry.{% endif %}
+  </p>
+  <div class="filters" role="group" aria-label="Filter runs">
+    <button class="chip on" data-f="all">All {{ runs|length }}</button>
+    <button class="chip v-failed" data-f="failed">Never succeeded {{ summary.failed }}</button>
+    <button class="chip v-recovered" data-f="recovered">Recovered {{ summary.recovered }}</button>
+    <button class="chip v-delivered" data-f="delivered">Delivered first time {{ summary.delivered }}</button>
+    {% if summary.suspect %}<button class="chip v-suspect" data-f="suspect">Empty {{ summary.suspect }}</button>{% endif %}
+    {% if summary.unknown %}<button class="chip v-unknown" data-f="unknown">Unknown status {{ summary.unknown }}</button>{% endif %}
+  </div>
+  {% if summary.to_retry %}
+  <form method="post" action="{{ url_for('retry_all') }}" class="bulk">
+    <button class="primary">Retry the {{ summary.to_retry }} safe run{{ 's' if summary.to_retry != 1 }}</button>
+    <span class="hint">Simulated: writes to the retry log, doesn't call a real job runner.</span>
+  </form>
+  {% endif %}
+</section>
+
+<section class="runs">
+  {% for r in runs %}
+  <article class="run v-{{ r.verdict }}" data-v="{{ r.verdict }}">
+    <button class="row" aria-expanded="false">
+      <span class="who"><b>{{ r.tenant }}</b><small>{{ r.report }}, {{ r.scheduled_at.strftime('%d %b') }}</small></span>
+      <span class="strip" aria-label="Attempts">
+        {% for a in r.attempts %}
+          <span class="att c-{{ a.category }}" title="Attempt {{ a.n }}: {{ a.status }}, {{ a.duration }}s">
+            <i style="width: {{ [14 + (a.duration / 300 * 46)|round|int, 60]|min }}px"></i>{{ a.status.replace('_',' ') }}
+          </span>
+        {% endfor %}
+        {% if r.action == 'RETRY' %}<span class="att c-next">next: attempt {{ r.next_attempt }}</span>{% endif %}
+      </span>
+      <span class="badge b-{{ r.verdict }}">
+        {% if r.verdict == 'failed' and r.action == 'RETRY' %}Retry now
+        {% elif r.verdict == 'failed' %}Needs a person
+        {% elif r.verdict == 'delivered' %}Delivered
+        {% elif r.verdict == 'recovered' %}Recovered
+        {% elif r.verdict == 'suspect' %}Empty report
+        {% elif r.verdict == 'unknown' %}Unknown status
+        {% else %}Running{% endif %}
+      </span>
+    </button>
+    <div class="detail" hidden>
+      <dl>
+        <dt>Run</dt><dd>{{ r.run_id }} &middot; {{ r.tenant_id }}</dd>
+        {% if r.reason %}<dt>Decision</dt><dd>{{ r.reason }}</dd>{% endif %}
+        {% if r.cause %}<dt>Likely cause</dt><dd>{{ r.cause }} <em class="hint">Rule-based hint, not a diagnosis.</em></dd>{% endif %}
+        <dt>Attempts</dt>
+        <dd>
+          <table>
+            <tr><th>#</th><th>Status</th><th>Counted as</th><th>Seconds</th><th>Rows</th></tr>
+            {% for a in r.attempts %}
+            <tr><td>{{ a.n }}</td><td>{{ a.status }}</td><td>{{ a.category }}</td><td>{{ a.duration }}</td><td>{{ a.rows if a.rows is not none else 'none' }}</td></tr>
+            {% endfor %}
+          </table>
+        </dd>
+      </dl>
+      {% if r.action == 'RETRY' %}
+        {% if r.run_id in done %}
+          <p class="queued">Retry already queued as attempt {{ done[r.run_id]['attempt_number'] }}.</p>
+        {% else %}
+          <form method="post" action="{{ url_for('retry', run_id=r.run_id) }}"><button class="primary">Queue attempt {{ r.next_attempt }}</button></form>
+        {% endif %}
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="tenants">
+  <h2>By tenant</h2>
+  <ul>
+    {% for name, t in tenants.items() %}
+    <li><span>{{ name }}</span>
+      <span class="bar" aria-label="{{ t.clean }} of {{ t.runs }} clean"><i class="ok" style="flex: {{ t.clean }}"></i><i class="bad" style="flex: {{ t.problem }}"></i></span>
+      <small>{{ t.clean }}/{{ t.runs }} clean</small></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<script>
+const chips = document.querySelectorAll('.chip');
+chips.forEach(c => c.addEventListener('click', () => {
+  chips.forEach(x => x.classList.toggle('on', x === c));
+  document.querySelectorAll('.run').forEach(r => {
+    r.hidden = !(c.dataset.f === 'all' || r.dataset.v === c.dataset.f);
+  });
+}));
+document.querySelectorAll('.row').forEach(b => b.addEventListener('click', () => {
+  const d = b.nextElementSibling, open = d.hidden;
+  d.hidden = !open; b.setAttribute('aria-expanded', open);
+}));
+// Open the problem runs by default so the answer is visible without clicking.
+document.querySelectorAll('.run.v-failed .row, .run.v-suspect .row, .run.v-unknown .row').forEach(b => b.click());
+</script>
+</body>
+</html>

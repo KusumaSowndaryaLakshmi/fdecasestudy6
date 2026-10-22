@@ -1,0 +1,24 @@
+{
+  "jobs": [
+    {"job_id": "J-001", "run_id": "R-001", "tenant_id": "T-01", "tenant_name": "Alpha Corp", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 42, "row_count": 1820},
+    {"job_id": "J-002", "run_id": "R-002", "tenant_id": "T-01", "tenant_name": "Alpha Corp", "report_name": "Monthly Statement", "scheduled_at": "2026-09-08T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 39, "row_count": 1904},
+
+    {"job_id": "J-003", "run_id": "R-003", "tenant_id": "T-02", "tenant_name": "Beta Retail", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:00:00", "status": "failed", "attempt_number": 1, "duration_seconds": 11, "row_count": null},
+    {"job_id": "J-004", "run_id": "R-003", "tenant_id": "T-02", "tenant_name": "Beta Retail", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:05:00", "status": "completed", "attempt_number": 2, "duration_seconds": 55, "row_count": 3210},
+    {"job_id": "J-005", "run_id": "R-004", "tenant_id": "T-02", "tenant_name": "Beta Retail", "report_name": "Monthly Statement", "scheduled_at": "2026-09-08T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 48, "row_count": 3305},
+
+    {"job_id": "J-006", "run_id": "R-005", "tenant_id": "T-03", "tenant_name": "Gamma Health", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:00:00", "status": "timed_out", "attempt_number": 1, "duration_seconds": 300, "row_count": null},
+    {"job_id": "J-007", "run_id": "R-005", "tenant_id": "T-03", "tenant_name": "Gamma Health", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:10:00", "status": "timed_out", "attempt_number": 2, "duration_seconds": 300, "row_count": null},
+    {"job_id": "J-008", "run_id": "R-005", "tenant_id": "T-03", "tenant_name": "Gamma Health", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:20:00", "status": "failed", "attempt_number": 3, "duration_seconds": 14, "row_count": null},
+    {"job_id": "J-009", "run_id": "R-006", "tenant_id": "T-03", "tenant_name": "Gamma Health", "report_name": "Monthly Statement", "scheduled_at": "2026-09-08T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 51, "row_count": 4110},
+
+    {"job_id": "J-010", "run_id": "R-007", "tenant_id": "T-04", "tenant_name": "Delta Logistics", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 37, "row_count": 980},
+    {"job_id": "J-011", "run_id": "R-008", "tenant_id": "T-04", "tenant_name": "Delta Logistics", "report_name": "Monthly Statement", "scheduled_at": "2026-09-08T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 40, "row_count": 1015},
+
+    {"job_id": "J-012", "run_id": "R-009", "tenant_id": "T-05", "tenant_name": "Epsilon Media", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 45, "row_count": 2260},
+    {"job_id": "J-013", "run_id": "R-010", "tenant_id": "T-05", "tenant_name": "Epsilon Media", "report_name": "Monthly Statement", "scheduled_at": "2026-09-08T02:00:00", "status": "error", "attempt_number": 1, "duration_seconds": 6, "row_count": null},
+
+    {"job_id": "J-014", "run_id": "R-011", "tenant_id": "T-06", "tenant_name": "Zeta Finance", "report_name": "Monthly Statement", "scheduled_at": "2026-09-01T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 33, "row_count": 760},
+    {"job_id": "J-015", "run_id": "R-012", "tenant_id": "T-06", "tenant_name": "Zeta Finance", "report_name": "Monthly Statement", "scheduled_at": "2026-09-08T02:00:00", "status": "completed", "attempt_number": 1, "duration_seconds": 31, "row_count": 802}
+  ]
+}
